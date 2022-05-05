@@ -9,6 +9,7 @@ const setup = () => {
     loadImg(1, 'image/spaceship.png')
     loadImg(2, 'image/missile.png')
     initSShip()
+    initMissile()
 }
 
 /**
@@ -57,13 +58,29 @@ const moveSShip = () => {
     if(key[39] > 0 && ssX < 1000) ssX += 20
     if(key[38] > 0 && ssY > 40) ssY -= 20
     if(key[40] > 0 && ssY < 680) ssY += 20
-    if(key[32] === 1) setMissile(ssX + 40, ssY, 40, 0)
+    if(key[32] === 1) {
+        key[32]++
+        setMissile(ssX + 40, ssY, 40, 0)
+    }
     drawImgC(1, ssX, ssY)
 }
 
 //自機が打つ弾の管理
-let mslX :number, mslY :number, mslXp :number, mslYp :number
-let mslF :boolean = false
+let MSL_MAX :number = 100 //ミサイル(配列)の総数
+let mslX :number[] = new Array(MSL_MAX)
+let mslY :number[] = new Array(MSL_MAX)
+let mslXp :number[] = new Array(MSL_MAX)
+let mslYp :number[] = new Array(MSL_MAX)
+let mslF :boolean[] = new Array(MSL_MAX)
+let mslNum :number = 0
+
+/**
+ * ミサイル処理の初期化
+ */
+const initMissile = () => {
+    for (let i = 0; i < MSL_MAX; i++) mslF[i] = false
+    mslNum = 0
+}
 
 /**
  * ミサイルのセット
@@ -74,23 +91,26 @@ let mslF :boolean = false
  */
 const setMissile = (x :number, y :number, xp :number, yp :number) => {
     
-    if (!mslF) {
-        mslX = x
-        mslY = y
-        mslXp = xp
-        mslYp = yp
-        mslF = true
-    }
+    mslX[mslNum] = x //船の位置からミサイル発射
+    mslY[mslNum] = y
+    mslXp[mslNum] = xp
+    mslYp[mslNum] = yp
+    mslF[mslNum] = true
+    mslNum = (mslNum + 1) % MSL_MAX //ミサイルカウント増加 & 100になったらリセット
+
 }
 
 /**
  * ミサイルの動き
  */
 const moveMissile = () => {
-    if (mslF) {
-        mslX += mslXp
-        mslY += mslYp
-        drawImgC(2, mslX, mslY)
-        if(mslX > 1200) mslF = false
+    for (let i = 0; i < MSL_MAX; i++) {
+        
+        if (mslF[i]) {
+            mslX[i] += mslXp[i]
+            mslY[i] += mslYp[i]
+            drawImgC(2, mslX[i], mslY[i])
+            if(mslX[i] > 1200) mslF[i] = false //弾が画面外に行ったら次が打てる
+        }
     }
 }

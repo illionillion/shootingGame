@@ -9,6 +9,7 @@ const setup = () => {
     loadImg(1, 'image/spaceship.png');
     loadImg(2, 'image/missile.png');
     initSShip();
+    initMissile();
 };
 /**
  * メインループ
@@ -56,13 +57,28 @@ const moveSShip = () => {
         ssY -= 20;
     if (key[40] > 0 && ssY < 680)
         ssY += 20;
-    if (key[32] === 1)
+    if (key[32] === 1) {
+        key[32]++;
         setMissile(ssX + 40, ssY, 40, 0);
+    }
     drawImgC(1, ssX, ssY);
 };
 //自機が打つ弾の管理
-let mslX, mslY, mslXp, mslYp;
-let mslF = false;
+let MSL_MAX = 100; //ミサイル(配列)の総数
+let mslX = new Array(MSL_MAX);
+let mslY = new Array(MSL_MAX);
+let mslXp = new Array(MSL_MAX);
+let mslYp = new Array(MSL_MAX);
+let mslF = new Array(MSL_MAX);
+let mslNum = 0;
+/**
+ * ミサイル処理の初期化
+ */
+const initMissile = () => {
+    for (let i = 0; i < MSL_MAX; i++)
+        mslF[i] = false;
+    mslNum = 0;
+};
 /**
  * ミサイルのセット
  * @param x mslX
@@ -71,23 +87,24 @@ let mslF = false;
  * @param yp mslYp
  */
 const setMissile = (x, y, xp, yp) => {
-    if (!mslF) {
-        mslX = x;
-        mslY = y;
-        mslXp = xp;
-        mslYp = yp;
-        mslF = true;
-    }
+    mslX[mslNum] = x; //船の位置からミサイル発射
+    mslY[mslNum] = y;
+    mslXp[mslNum] = xp;
+    mslYp[mslNum] = yp;
+    mslF[mslNum] = true;
+    mslNum = (mslNum + 1) % MSL_MAX; //ミサイルカウント増加 & 100になったらリセット
 };
 /**
  * ミサイルの動き
  */
 const moveMissile = () => {
-    if (mslF) {
-        mslX += mslXp;
-        mslY += mslYp;
-        drawImgC(2, mslX, mslY);
-        if (mslX > 1200)
-            mslF = false;
+    for (let i = 0; i < MSL_MAX; i++) {
+        if (mslF[i]) {
+            mslX[i] += mslXp[i];
+            mslY[i] += mslYp[i];
+            drawImgC(2, mslX[i], mslY[i]);
+            if (mslX[i] > 1200)
+                mslF[i] = false; //弾が画面外に行ったら次が打てる
+        }
     }
 };
