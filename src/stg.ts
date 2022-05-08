@@ -15,7 +15,9 @@ const setup = () => {
 /**
  * メインループ
  */
+let tmr :number = 0
 const mainloop = () => {
+    tmr++
     drawBG(1)
     // drawBG(5)//大きくなると速くなる
     moveSShip()
@@ -41,6 +43,7 @@ const drawBG = (spd :number) => {
 // 自機の管理
 let ssX :number = 0
 let ssY :number = 0
+let automa :number = 0
 
 /**
  * 船の生成
@@ -58,10 +61,21 @@ const moveSShip = () => {
     if(key[39] > 0 && ssX < 1000) ssX += 20
     if(key[38] > 0 && ssY > 40) ssY -= 20
     if(key[40] > 0 && ssY < 680) ssY += 20
-    if(key[32] === 1) {
+    if (key[65] === 1) { // 自動発射ON/OFF
+        key[65]++
+        automa = 1 - automa
+    }
+    if(automa === 0 && key[32] === 1) { // 発射
         key[32]++
         setMissile(ssX + 40, ssY, 40, 0)
     }
+    if(automa === 1 && tmr % 2 === 0) { // 自動発射
+        setMissile(ssX + 40, ssY, 40, 0)
+    }
+    let col :string = 'black'
+    if(automa === 1) col = 'white'
+    fRect(900, 20, 280, 60, 'blue')
+    fText('[A]uto Missile', 1040, 50, 36, col)
     drawImgC(1, ssX, ssY)
 }
 
@@ -105,7 +119,6 @@ const setMissile = (x :number, y :number, xp :number, yp :number) => {
  */
 const moveMissile = () => {
     for (let i = 0; i < MSL_MAX; i++) {
-        
         if (mslF[i]) {
             mslX[i] += mslXp[i]
             mslY[i] += mslYp[i]

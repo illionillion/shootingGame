@@ -14,7 +14,9 @@ const setup = () => {
 /**
  * メインループ
  */
+let tmr = 0;
 const mainloop = () => {
+    tmr++;
     drawBG(1);
     // drawBG(5)//大きくなると速くなる
     moveSShip();
@@ -38,6 +40,7 @@ const drawBG = (spd) => {
 // 自機の管理
 let ssX = 0;
 let ssY = 0;
+let automa = 0;
 /**
  * 船の生成
  */
@@ -57,10 +60,22 @@ const moveSShip = () => {
         ssY -= 20;
     if (key[40] > 0 && ssY < 680)
         ssY += 20;
-    if (key[32] === 1) {
+    if (key[65] === 1) { // 自動発射ON/OFF
+        key[65]++;
+        automa = 1 - automa;
+    }
+    if (automa === 0 && key[32] === 1) { // 発射
         key[32]++;
         setMissile(ssX + 40, ssY, 40, 0);
     }
+    if (automa === 1 && tmr % 2 === 0) { // 自動発射
+        setMissile(ssX + 40, ssY, 40, 0);
+    }
+    let col = 'black';
+    if (automa === 1)
+        col = 'white';
+    fRect(900, 20, 280, 60, 'blue');
+    fText('[A]uto Missile', 1040, 50, 36, col);
     drawImgC(1, ssX, ssY);
 };
 //自機が打つ弾の管理
